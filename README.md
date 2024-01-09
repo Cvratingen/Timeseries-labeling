@@ -32,7 +32,7 @@ When you close the plot, the data can be saved to a csv file if you add an `exit
 Simple example code
 
 ~~~python
-import numpy as np
+import math
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib_assist import MatplotlibAssist
@@ -40,7 +40,9 @@ from matplotlib_assist import MatplotlibAssist
 # Create example data
 date_range = pd.date_range(start="2020-01-01", periods=1000, freq="1min")
 example_df = pd.DataFrame({
-    "Independent_var":  np.sin(np.linspace(0, 10*np.pi, 500).tolist() + np.linspace(0, 50*np.pi, 500).tolist()) * 4 + 5.5,
+    "Independent_var":  (
+                [math.sin(x / (2 * math.pi)) * 4 + 5.5 for x in range(500)] +
+                [math.sin(x / (10 * math.pi)) * 4 + 5.5 for x in range(500, 1000)]), 
     "Dependent_var_1": [int(x < 500) for x in range(1000)],
     "Dependent_var_2": [int(x > 550) - 2 for x in range(1000)],
     "time_stamp": date_range}).set_index("time_stamp")
@@ -58,7 +60,7 @@ handler_instance = MatplotlibAssist(
     ax=fig,
     df=example_df,
     update_dict=update_dict,
-    exit_function=lambda df: df.to_csv("labeled_data.csv")  # Save the data to a csv file when the plot is closed
+    exit_function=lambda df: df.to_csv("labeled_data.csv")  # Save the data to a csv file
 )
 
 # Connect to the figure

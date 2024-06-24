@@ -6,7 +6,7 @@ setup(
     description='A tool for labeling time series data',
     packages=find_packages(),
     install_requires=[
-        'pandas',
-        'matplotlib'
+        'pandas>=1.0',
+        'matplotlib>=3.0',
     ],
 )

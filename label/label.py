@@ -14,17 +14,29 @@ class MatplotlibAssist:
     def __init__(self,
                  ax: plt.Axes,
                  df: pd.DataFrame,
-                 update_dict: dict = None,
+                 update_dict: dict,
                  index_timestamp_unit: str = None,
                  exit_function: callable = None):
         if not isinstance(df.index, pd.DatetimeIndex):
             raise ValueError("Index must be a datetime index")
-        if update_dict is None:
-            raise ValueError("Update dict must be provided"
-                             "\nExample: {'keyname': {'label_name': 123}}"
-                             "\nKeyname is the key pressed and label_name is the column to update to value 123")
+        for key, value in update_dict.items():
+            if not isinstance(value, dict):
+                if value not in df.columns:
+                    raise ValueError("Update dict values must be columns in the dataframe."
+                                     f"\nColumn {value} not found in dataframe."
+                                     "\nExample: {'keyname': {'label_name': 123}}"
+                                     "\nKeyname is the key pressed and label_name is the column to update to value 123")
+            else:
+                for label, value in value.items():
+                    if label not in df.columns:
+                        raise ValueError("Update dict values must be columns in the dataframe."
+                                         f"\nColumn {label} not found in dataframe."
+                                         "\nExample: {'keyname': {'label_name': 123}}"
+                                         "\nKeyname is the key pressed and label_name is the column to update to value 123")
         if "start" in update_dict.keys() or "end" in update_dict.keys():
             raise ValueError("Start and end are reserved keywords, please use something else")
+        if exit_function is None:
+            log.warning("No exit function specified, label updates will not be saved")
 
         self.ax = ax
         self.df = df
@@ -34,6 +46,7 @@ class MatplotlibAssist:
         self.key_dict = {}
         self.index_timestamp_unit = index_timestamp_unit
         self.exit_function = exit_function
+        self.lines = None
 
         self.temp_start_line = None
         self.temp_end_line = None
@@ -98,15 +111,15 @@ class MatplotlibAssist:
             return
 
         # Order doesn't matter, so we sort them
-        tempstart = min(self.temp_event.get("start"), self.temp_event.get("end"))
-        tempend = max(self.temp_event.get("start"), self.temp_event.get("end"))
+        temp_start = min(self.temp_event.get("start"), self.temp_event.get("end"))
+        temp_end = max(self.temp_event.get("start"), self.temp_event.get("end"))
 
         if event.key in self.update_dict.keys():
             # Update the dataframe
             for label, value in self.update_dict[event.key].items():
                 self.overwrite_value(self.update_dict[event.key][label],
-                                     tempstart,
-                                     tempend,
+                                     temp_start,
+                                     temp_end,
                                      label)
         else:
             # Dont reset
@@ -155,9 +168,11 @@ class MatplotlibAssist:
                              index_start,
                              index_end):
         """
-        Guesses the timestamp based on comparing a clicked datetime stamp, and the index of the dataframe
-        :param start:
-        :param end:
+        Guesses the timestamp based on comparing a clicked datetime stamp, and the index of the dataframe. This is
+        necessary because matplotlib converts this timestamp to a numerical value, the unit of which is not known.
+        :param timestamp:    The timestamp from which to infer the unit
+        :param index_start:  The start of the dataframe DateTimeIndex
+        :param index_end:    The end of the dataframe DateTimeIndex
         :return:
         """
         possible_units = ["D", "h", "m", "s", "ms", "us", "ns"]
@@ -191,7 +206,7 @@ class MatplotlibAssist:
         self.df.loc[(after_start & before_end), label] = new_value
         self.update_plot_line(label)
 
-    def disconnect(self, event):
+    def disconnect(self):
         """
         Disconnects the matplotlib canvas, and closes the figure.
         You can supply an exit function to be called after the figure has been closed.
@@ -200,4 +215,4 @@ class MatplotlibAssist:
         """
         plt.close(self.ax.figure)
         if self.exit_function is not None:
-            self.exit_function(df = self.df)
+            self.exit_function(df=self.df)

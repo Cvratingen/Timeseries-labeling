@@ -2,10 +2,10 @@ import math
 import pandas as pd
 import matplotlib.pyplot as plt
 
-from label import MatplotlibAssist
+from label.label import MatplotlibAssist
 
 
-if __name__ == '__main__':
+def main():
     # This example variable is a sine wave with a different frequency from the halfway point
 
     date_range = pd.date_range(start="2020-01-01", periods=1000, freq="1min")
@@ -32,3 +32,6 @@ if __name__ == '__main__':
     handler_instance.connect()
     plt.show(block=True)
 
+
+if __name__ == '__main__':
+    main()

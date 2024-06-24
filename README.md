@@ -12,9 +12,12 @@ This tool is designed to be used with matplotlib and pandas.
 - Then you can push a key to update the data and redraw the data.
 - Optionally you can use left and right arrow keys to set that as the data start or end respectively (rest will be deleted).
 
+
 ## Installation
 
 The easiest way to use this tool is to incorporate the `MatplotlibAssist` class into your own code.
+* If you are using PyCharm, turn of the "Show plots in tool window" setting in the matplotlib preferences.
+found here `PyCharm > Settings > Tools > Python Plots`
 
 ## Example
 
@@ -35,7 +38,7 @@ Simple example code
 import math
 import pandas as pd
 import matplotlib.pyplot as plt
-from matplotlib_assist import MatplotlibAssist
+from timeseries_labeler import MatplotlibAssist
 
 # Create example data
 date_range = pd.date_range(start="2020-01-01", periods=1000, freq="1min")
